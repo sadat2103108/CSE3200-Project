@@ -76,39 +76,104 @@ Your task:
 - Generate user_reply for the user.
 `;
 
+
+
+
 // ----------------------- Global Bot Commands -----------------------
 const botCommands = [
   {
     command: "calendar.fetch_events",
-    description: "Fetches events from Google Calendar within a date range",
-    params: { from: "ISO start", to: "ISO end" },
-    example: { command: "calendar.fetch_events", params: { from: "2025-12-22T00:00:00+06:00", to: "2025-12-23T00:00:00+06:00" } }
+    description:
+      "Fetches events from Google Calendar within a date range. All datetime values MUST include timezone offset or timezone.",
+    params: {
+      from: "ISO 8601 datetime WITH timezone offset (e.g. 2025-12-22T00:00:00+06:00)",
+      to: "ISO 8601 datetime WITH timezone offset (e.g. 2025-12-23T00:00:00+06:00)"
+    },
+    example: {
+      command: "calendar.fetch_events",
+      params: {
+        from: "2025-12-22T00:00:00+06:00",
+        to: "2025-12-23T23:59:59+06:00"
+      }
+    }
   },
+
   {
     command: "calendar.add_event",
-    description: "Adds a new event to Google Calendar",
-    params: { summary: "title", description: "optional description", start: "ISO start", end: "ISO end" },
-    example: { command: "calendar.add_event", params: { summary: "DP Practice", description: "Practice session", start: "2025-12-22T20:00:00+06:00", end: "2025-12-22T21:00:00+06:00" } }
+    description:
+      "Adds a new event to Google Calendar. Start and end MUST include timezone offset (+06:00) or explicit timezone.",
+    params: {
+      summary: "Title of the event",
+      description: "Optional description",
+      start: "ISO 8601 datetime WITH timezone offset (e.g. 2025-12-22T08:00:00+06:00)",
+      end: "ISO 8601 datetime WITH timezone offset (e.g. 2025-12-22T08:30:00+06:00)"
+    },
+    example: {
+      command: "calendar.add_event",
+      params: {
+        summary: "Morning Walk",
+        description: "Morning walk with a friend",
+        start: "2025-12-22T08:00:00+06:00",
+        end: "2025-12-22T08:30:00+06:00"
+      }
+    }
   },
+
   {
     command: "calendar.update_event",
-    description: "Updates an existing calendar event",
-    params: { eventId: "id", summary: "new title", description: "new description", start: "ISO start", end: "ISO end" },
-    example: { command: "calendar.update_event", params: { eventId: "xyz", summary: "Updated DP Practice", start: "2025-12-22T21:00:00+06:00", end: "2025-12-22T22:00:00+06:00" } }
+    description:
+      "Updates an existing calendar event. Any provided datetime MUST include timezone offset.",
+    params: {
+      eventId: "ID of the event to update",
+      summary: "New title (optional)",
+      description: "New description (optional)",
+      start: "ISO 8601 datetime WITH timezone offset (optional)",
+      end: "ISO 8601 datetime WITH timezone offset (optional)"
+    },
+    example: {
+      command: "calendar.update_event",
+      params: {
+        eventId: "ui8nd7gb17v2fvrp1gdtfffa8s",
+        summary: "Updated Morning Walk",
+        start: "2025-12-22T09:00:00+06:00",
+        end: "2025-12-22T09:30:00+06:00"
+      }
+    }
   },
+
   {
     command: "calendar.delete_event",
-    description: "Deletes a calendar event",
-    params: { eventId: "id" },
-    example: { command: "calendar.delete_event", params: { eventId: "xyz" } }
+    description: "Deletes an event from Google Calendar.",
+    params: {
+      eventId: "ID of the event to delete"
+    },
+    example: {
+      command: "calendar.delete_event",
+      params: {
+        eventId: "ui8nd7gb17v2fvrp1gdtfffa8s"
+      }
+    }
   },
+
   {
     command: "email.send",
-    description: "Sends an email via Gmail",
-    params: { to: "recipient", subject: "subject", body: "content" },
-    example: { command: "email.send", params: { to: "friend@example.com", subject: "Hello", body: "Hi!" } }
+    description: "Sends an email via Gmail.",
+    params: {
+      to: "Recipient email address",
+      subject: "Email subject",
+      body: "Email body text"
+    },
+    example: {
+      command: "email.send",
+      params: {
+        to: "friend@example.com",
+        subject: "Morning Walk",
+        body: "Want to join me for a walk tomorrow at 8 AM?"
+      }
+    }
   }
 ];
+
 
 // ----------------------- Load Memory -----------------------
 let memory = {};
@@ -119,10 +184,20 @@ if (fs.existsSync(MEMORY_FILE)) {
 // ----------------------- Bot Function -----------------------
 export async function runBot(userPrompt) {
 
-  
-  
+
+
   try {
-    
+    const now = new Date();
+    const localTimeInfo =
+      "Current local time context:\n" +
+      "- ISO datetime: " + now.toISOString() + "\n" +
+      "- Local date: " + now.toDateString() + "\n" +
+      "- Local time: " + now.toTimeString() + "\n" +
+      "- Timezone offset (minutes): " + now.getTimezoneOffset() + "\n" +
+      "- Timezone: Asia/Dhaka";
+
+
+
     const response = await fetch(`${BASE_URL}/${MODEL}:generateContent?key=${API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -134,12 +209,15 @@ export async function runBot(userPrompt) {
               {
                 text:
                   systemPrompt +
-                  "\n\nBot Commands Metadata:\n" +
+                  "\n\n=== TIME CONTEXT (IMPORTANT) ===\n" +
+                  localTimeInfo +
+                  "\n\n=== BOT COMMANDS METADATA ===\n" +
                   JSON.stringify(botCommands, null, 2) +
-                  "\n\nUser Prompt:\n" +
+                  "\n\n=== USER PROMPT ===\n" +
                   userPrompt +
-                  "\n\nUser Memory:\n" +
+                  "\n\n=== USER MEMORY ===\n" +
                   JSON.stringify(memory, null, 2)
+
               }
             ]
           }
@@ -179,7 +257,7 @@ export async function runBot(userPrompt) {
     }
 
     // Log AI reply
-    console.log("AI Reply:", user_reply);
+    // console.log("AI Reply:", user_reply);
 
     return { updated_memory: memory, commands: commands || [], user_reply };
 
