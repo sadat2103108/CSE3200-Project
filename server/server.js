@@ -13,7 +13,7 @@ app.use("/calendar", calendarRoutes);
 app.use("/email", emailRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Bot test API running 🚀");
+  res.send("Bot test API running...");
 });
 
 const PORT = process.env.PORT || 3000;
