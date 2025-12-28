@@ -14,13 +14,26 @@ if (fs.existsSync(MEMORY_FILE)) {
   memory = JSON.parse(fs.readFileSync(MEMORY_FILE, "utf-8"));
 }
 
+
+function safeWriteJSON(filePath, data) {
+  const tempPath = filePath + ".tmp";
+
+  fs.writeFileSync(
+    tempPath,
+    JSON.stringify(data, null, 2),
+    "utf-8"
+  );
+
+  fs.renameSync(tempPath, filePath);
+}
+
 // ----------------------- Bot Function -----------------------
 export async function runBot(userPrompt) {
 
   try {
 
 
-    const agentReply = await callAgent({userPrompt,memory});
+    const agentReply = await callAgent({ userPrompt, memory });
 
 
     // Parse JSON returned by Gemini
@@ -37,7 +50,7 @@ export async function runBot(userPrompt) {
     // Save updated memory
     if (updated_memory) {
       memory = updated_memory;
-      fs.writeFileSync(MEMORY_FILE, JSON.stringify(memory, null, 2), "utf-8");
+      safeWriteJSON("memory.json", memory);
     }
 
     // Execute bot commands
