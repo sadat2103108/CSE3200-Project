@@ -1,5 +1,6 @@
+import express from "express";
 import { google } from "googleapis";
-import readline from "readline";
+import open from "open"; // optional: auto-opens browser
 import "dotenv/config";
 
 const {
@@ -8,44 +9,54 @@ const {
   GOOGLE_REDIRECT_URI
 } = process.env;
 
+const app = express();
+const PORT = 3000; // make sure this matches your REDIRECT_URI
+
 const oauth2Client = new google.auth.OAuth2(
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI
 );
 
-// 👉 SCOPES ARE DECLARED HERE
 const SCOPES = [
-  "https://www.googleapis.com/auth/calendar",
-  "https://www.googleapis.com/auth/gmail.send"
+  "https://www.googleapis.com/auth/gmail.send",
+  "https://www.googleapis.com/auth/calendar"
 ];
 
+// Generate auth URL
 const authUrl = oauth2Client.generateAuthUrl({
-  access_type: "offline",   // REQUIRED for refresh token
-  prompt: "consent",        // REQUIRED (forces refresh token)
+  access_type: "offline",
+  prompt: "consent",
   scope: SCOPES
 });
 
-console.log("\nAuthorize this app by visiting:\n");
-console.log(authUrl, "\n");
+console.log("🔗 Open this URL to authorize the app:\n", authUrl);
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+// Optionally, auto-open browser
+open(authUrl);
 
-rl.question("Paste the code from the page here: ", async (code) => {
-  rl.close();
+// Callback route to catch Google's redirect
+app.get("/oauth2callback", async (req, res) => {
+  const code = req.query.code;
+  if (!code) return res.send("❌ No code received");
 
   try {
     const { tokens } = await oauth2Client.getToken(code);
-
-    console.log("\n✅ TOKENS RECEIVED:\n");
+    console.log("\n✅ TOKENS RECEIVED:");
     console.log(tokens);
 
-    console.log("\n👉 SAVE THIS IN .env:\n");
+    // Save refresh token in a file or just print it
+    console.log("\n👉 Copy this into your .env:");
     console.log(`GOOGLE_REFRESH_TOKEN=${tokens.refresh_token}`);
+
+    res.send("✅ Token received! Check console.");
+    process.exit(0); // stop server
   } catch (err) {
-    console.error("❌ Error retrieving access token", err);
+    console.error("❌ Failed to get token:", err.response?.data || err.message);
+    res.send("❌ Failed to get token. See console.");
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}/oauth2callback`);
 });
