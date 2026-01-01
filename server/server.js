@@ -21,6 +21,13 @@ app.get("/", (req, res) => {
 });
 
 
+app.get("/oauth2callback", async (req, res) => {
+  const code = req.query.code;
+  const { tokens } = await oauth2Client.getToken(code);
+  res.send("✅ Tokens received. Check console.");
+  console.log(tokens);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
