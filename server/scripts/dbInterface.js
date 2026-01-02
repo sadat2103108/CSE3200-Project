@@ -1,14 +1,14 @@
-// scripts/memoryUtils.js
+// scripts/dbInterface.js
 
 
 /**
  * ===========================================
  * Memory DB Utility Script
  * Export current DB memory:
- *      node scripts/memoryUtils.js export
+ *      node scripts/dbInterface.js export
  *
  * Seed DB memory from a JSON file:
- *      node scripts/memoryUtils.js seed seedInput.json
+ *      node scripts/dbInterface.js seed seedInput.json
  *
  * ===========================================
  */
@@ -68,8 +68,8 @@ export function seedMemoryFromJSON(inputFile) {
 
 /* ----------------------- Example Usage ----------------------- */
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
-  // CLI: node memoryUtils.js export   -> exports DB to memory_temp.json
-  // CLI: node memoryUtils.js seed <file.json>  -> seeds DB from input file
+  // CLI: node dbInterface.js export   -> exports DB to memory_temp.json
+  // CLI: node dbInterface.js seed <file.json>  -> seeds DB from input file
   const [,, cmd, file] = process.argv;
 
   if (cmd === "export") {
@@ -82,7 +82,7 @@ if (fileURLToPath(import.meta.url) === process.argv[1]) {
     }
   } else {
     console.log("Usage:");
-    console.log("  node memoryUtils.js export          -> export DB memory to JSON");
-    console.log("  node memoryUtils.js seed <file.json> -> seed DB from JSON file");
+    console.log("  node dbInterface.js export          -> export DB memory to JSON");
+    console.log("  node dbInterface.js seed <file.json> -> seed DB from JSON file");
   }
 }

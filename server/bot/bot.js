@@ -17,6 +17,8 @@ export async function runBot(userPrompt) {
     const parsed = JSON.parse(agentReply);
     const { updated_memory, commands, user_reply } = parsed;
 
+    console.log(parsed);
+
     // persist memory
     if (updated_memory) {
       memory = updated_memory;
