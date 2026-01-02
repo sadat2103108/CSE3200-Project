@@ -15,3 +15,4 @@ export async function handleTelegramMessage(bot, msg) {
     await bot.sendMessage(chatId, "Something went wrong 😕");
   }
 }
+
