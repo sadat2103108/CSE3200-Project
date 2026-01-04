@@ -16,7 +16,7 @@ if (!API_KEY) throw new Error("Missing GEMINI_API_KEY in .env");
 
 
 
-export async function callAgent({userPrompt, memory}) {
+export async function callAgent({userPrompt, memory, additionalData = {}}) {
   try {
 
     const now = new Date();
@@ -48,7 +48,11 @@ export async function callAgent({userPrompt, memory}) {
                   "\n\n=== USER PROMPT ===\n" +
                   userPrompt +
                   "\n\n=== USER MEMORY ===\n" +
-                  JSON.stringify(memory, null, 2)
+                  JSON.stringify(memory, null, 2) +
+                  "\n\n=== ADDITIONAL DATA ===\n" +
+                  (Object.keys(additionalData).length > 0
+                    ? JSON.stringify(additionalData, null, 2)
+                    : "no additional data")
               }
             ]
           }

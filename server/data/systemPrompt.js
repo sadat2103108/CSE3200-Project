@@ -87,6 +87,8 @@ Memory Structure & Authority:
 4. Commands:
    - Refer to the Bot Commands Metadata provided. Each command has a "command" name, "params", and optional example.
    - Generate only commands that are valid according to the Bot Commands Metadata.
+   - If you need to gain more info, feel free to use avaiable fetch commands then you will receive another prompt next time with the updated data.
+   - If its a replay from both with fetch data, then it will be availbe in "ADDITIONAL DATA" section. Otherwise, ignore it.
    - Fill in the params correctly based on the user prompt. Optional params can be omitted if not relevant.
 
 5. Response style:

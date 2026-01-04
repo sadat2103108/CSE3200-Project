@@ -11,13 +11,42 @@ let memory = loadMemory();
 export async function runBot(userPrompt) {
   try {
 
-    const agentReply = await callAgent({ userPrompt, memory });
+    let agentReply = await callAgent({ userPrompt, memory });
+    let additionalData = {};
 
     // AI returns JSON
-    const parsed = JSON.parse(agentReply);
-    const { updated_memory, commands, user_reply } = parsed;
+    let parsed = JSON.parse(agentReply);
+    let { updated_memory, commands, user_reply } = parsed;
 
     console.log(parsed);
+
+    // Loop to handle fetch commands
+    while (commands && commands.length > 0 && commands.some(cmd => cmd.command && cmd.command.includes('fetch'))) {
+      // Filter to keep only fetch commands
+      const fetchCommands = commands.filter(cmd => cmd.command && cmd.command.includes('fetch'));
+      
+      // Execute fetch commands
+      const { fetchedData } = await executeBotCommands(fetchCommands);
+      
+      // Set additionalData with fetched results
+      if (fetchedData) {
+        additionalData = { fetchedData };
+      }
+
+      // Call agent again with additionalData containing the fetched data
+      agentReply = await callAgent({ userPrompt, memory, additionalData });
+      parsed = JSON.parse(agentReply);
+      
+      // Update response variables
+      const { updated_memory: newMemory, commands: newCommands, user_reply: newUserReply } = parsed;
+      if (newMemory) {
+        updated_memory = newMemory;
+      }
+      commands = newCommands;
+      user_reply = newUserReply;
+      
+      console.log("Agent reply after fetch:", parsed);
+    }
 
     // persist memory
     if (updated_memory) {
@@ -25,7 +54,7 @@ export async function runBot(userPrompt) {
       saveMemory(memory);
     }
 
-    // execute commands
+    // execute commands (non-fetch commands)
     if (commands && commands.length > 0) {
       await executeBotCommands(commands);
     }

@@ -16,12 +16,15 @@ import { sendEmail } from "../utils/email.js";
  *   command: "calendar.add_event" | "calendar.update_event" | "calendar.delete_event" | "calendar.fetch" | "email.send",
  *   params: { ... }
  * }
+ * Returns an object with fetchedData if calendar.fetch was executed, otherwise null
  */
 export async function executeBotCommands(commands) {
   if (!Array.isArray(commands)) {
     console.error("Commands must be an array");
-    return;
+    return { fetchedData: null };
   }
+
+  let fetchedData = null;
 
   for (const cmd of commands) {
     try {
@@ -82,6 +85,8 @@ export async function executeBotCommands(commands) {
             id: e.id,
           }));
           console.log("📅 Fetched events:", minimalEvents);
+          // Store fetched data to return
+          fetchedData = minimalEvents;
           break;
         }
 
@@ -103,4 +108,6 @@ export async function executeBotCommands(commands) {
       console.error("❌ Error executing command:", cmd, err);
     }
   }
+
+  return { fetchedData };
 }

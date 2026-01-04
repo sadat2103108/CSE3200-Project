@@ -1,6 +1,6 @@
 export const botCommands = [
   {
-    command: "calendar.fetch_events",
+    command: "calendar.fetch",
     description:
       "Fetches events from Google Calendar within a date range. All datetime values MUST include timezone offset or timezone.",
     params: {
@@ -8,7 +8,7 @@ export const botCommands = [
       to: "ISO 8601 datetime WITH timezone offset (e.g. 2025-12-23T00:00:00+06:00)"
     },
     example: {
-      command: "calendar.fetch_events",
+      command: "calendar.fetch",
       params: {
         from: "2025-12-22T00:00:00+06:00",
         to: "2025-12-23T23:59:59+06:00"
