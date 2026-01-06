@@ -15,7 +15,15 @@ export async function runBot(userPrompt) {
     let additionalData = {};
 
     // AI returns JSON
-    let parsed = JSON.parse(agentReply);
+    let parsed;
+    try {
+      parsed = JSON.parse(agentReply);
+    } catch (e) {
+      console.error("JSON Parse Error:", e.message);
+      console.error("Agent Reply (first 1000 chars):", agentReply.substring(0, 1000));
+      console.error("Agent Reply (chars 15200-15400):", agentReply.substring(15200, 15400));
+      throw e;
+    }
     let { updated_memory, commands, user_reply } = parsed;
 
     console.log(parsed);

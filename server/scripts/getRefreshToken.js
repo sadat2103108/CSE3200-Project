@@ -20,7 +20,9 @@ const oauth2Client = new google.auth.OAuth2(
 
 const SCOPES = [
   "https://www.googleapis.com/auth/gmail.send",
-  "https://www.googleapis.com/auth/calendar"
+  "https://www.googleapis.com/auth/calendar",
+  "https://www.googleapis.com/auth/documents",
+  "https://www.googleapis.com/auth/drive"
 ];
 
 // Generate auth URL

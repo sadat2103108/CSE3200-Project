@@ -9,14 +9,25 @@ import {
 
 import { sendEmail } from "../utils/email.js";
 
+import {
+  createDocument,
+  readDocument,
+  appendContent,
+  replaceContent,
+  deleteDocument,
+  listDocuments,
+  shareDocument
+} from "../utils/docs.js";
+
 /**
  * Execute an array of bot commands.
  * Each command should have the structure:
  * {
- *   command: "calendar.add_event" | "calendar.update_event" | "calendar.delete_event" | "calendar.fetch" | "email.send",
+ *   command: "calendar.add_event" | "calendar.update_event" | "calendar.delete_event" | "calendar.fetch" | 
+ *            "email.send" | "docs.create" | "docs.read" | "docs.append" | "docs.replace" | "docs.list" | "docs.delete" | "docs.share",
  *   params: { ... }
  * }
- * Returns an object with fetchedData if calendar.fetch was executed, otherwise null
+ * Returns an object with fetchedData if calendar.fetch or docs.read/list was executed, otherwise null
  */
 export async function executeBotCommands(commands) {
   if (!Array.isArray(commands)) {
@@ -98,6 +109,91 @@ export async function executeBotCommands(commands) {
           }
           const res = await sendEmail(params);
           console.log("✉️ Email sent:", { id: res.id, to: params.to, subject: params.subject });
+          break;
+        }
+
+        // ---- Google Docs Commands ----
+        case "docs.create": {
+          if (!params.title) {
+            console.warn("⚠️ Missing title for docs.create");
+            break;
+          }
+          const doc = await createDocument(params.title, params.content || "");
+          console.log("📄 Created document:", {
+            documentId: doc.documentId,
+            title: doc.title,
+            webViewLink: doc.webViewLink,
+          });
+          fetchedData = doc;
+          break;
+        }
+
+        case "docs.read": {
+          if (!params.documentId) {
+            console.warn("⚠️ Missing documentId for docs.read");
+            break;
+          }
+          const doc = await readDocument(params.documentId);
+          console.log("📖 Read document:", {
+            documentId: doc.documentId,
+            title: doc.title,
+            contentLength: doc.content.length,
+          });
+          fetchedData = doc;
+          break;
+        }
+
+        case "docs.append": {
+          if (!params.documentId || !params.content) {
+            console.warn("⚠️ Missing documentId or content for docs.append");
+            break;
+          }
+          await appendContent(params.documentId, params.content);
+          console.log("➕ Appended content to document:", params.documentId);
+          break;
+        }
+
+        case "docs.replace": {
+          if (!params.documentId || !params.searchText || !params.replacementText) {
+            console.warn("⚠️ Missing documentId, searchText, or replacementText for docs.replace");
+            break;
+          }
+          const result = await replaceContent(params.documentId, params.searchText, params.replacementText);
+          console.log("🔄 Replaced content in document:", {
+            documentId: result.documentId,
+            occurrencesChanged: result.replaceCount,
+          });
+          break;
+        }
+
+        case "docs.list": {
+          const docs = await listDocuments(params.limit || 10);
+          console.log("📚 Listed documents:", docs.length, "document(s) found");
+          fetchedData = docs;
+          break;
+        }
+
+        case "docs.delete": {
+          if (!params.documentId) {
+            console.warn("⚠️ Missing documentId for docs.delete");
+            break;
+          }
+          await deleteDocument(params.documentId);
+          console.log("🗑️ Deleted document:", params.documentId);
+          break;
+        }
+
+        case "docs.share": {
+          if (!params.documentId || !params.email) {
+            console.warn("⚠️ Missing documentId or email for docs.share");
+            break;
+          }
+          const result = await shareDocument(params.documentId, params.email, params.role || "reader");
+          console.log("👥 Shared document:", {
+            documentId: result.documentId,
+            sharedWith: result.sharedWith,
+            role: result.role,
+          });
           break;
         }
 

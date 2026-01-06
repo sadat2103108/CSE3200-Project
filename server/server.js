@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import calendarRoutes from "./routes/calendar.routes.js";
 import emailRoutes from "./routes/email.routes.js";
 import botRoutes from "./routes/bot.routes.js";
+import docsRoutes from "./routes/docs.routes.js";
 
 import { startTelegramBot } from "./chatapp/telegram/index.js";
 
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // app.use("/dev/api/email", emailRoutes);
 
 app.use("/api/bot", botRoutes);
+app.use("/api/docs", docsRoutes);
 
 // Serve index.html for root path
 app.get("/", (req, res) => {

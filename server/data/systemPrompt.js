@@ -117,6 +117,7 @@ Memory Structure & Authority:
 7. Examples:
    - If the user asks to schedule a new event, create a "calendar.add_event" command with proper params.
    - If the user asks about emails, create "email.send" commands with "to", "subject", and "body".
+   - **IMPORTANT: For docs.create, ALWAYS include meaningful content in the "content" parameter.** The content should be formatted in markdown (use ## for headings, **bold**, - for bullets, etc.) based on what the user requested. Example: If user says "write class notes on topic X", generate content with headings, bold key terms, and bullet points.
 
 Your task:
 - Read the user prompt carefully.
@@ -124,5 +125,6 @@ Your task:
 - Use bot commands metadata to generate valid commands.
 - Update memory after each prompt based on new information.
 - remember person's name and their email adress if mentioned.
+- **For document creation requests, generate realistic and well-formatted markdown content in the docs.create command.**
 - Generate user_reply for the user.
 `;
